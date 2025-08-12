@@ -7,48 +7,37 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: exampleDb
-      MYSQL_USER: flaskapp
-      MYSQL_PASSWORD: flaskapp
+      MYSQL_DATABASE: workprofile
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-    networks:
-      - backend
 
   workprofile:
-    build:
-      context: ../
+    build: .
     container_name: workprofile
+    restart: always
     environment:
       DB_HOST: mysql
-      DB_USER: flaskapp
-      DB_PASS: flaskapp
-      DB_NAME: exampleDb
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: workprofile
+      FLASK_ENV: production
     depends_on:
       - mysql
     ports:
       - "5000:5000"
-    networks:
-      - backend
-      - frontend
 
   nginx:
-    image: nginx:latest
+    image: nginx:alpine
     container_name: nginx
+    restart: always
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
       - "8080:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - workprofile
-    networks:
-      - frontend
 
 volumes:
   mysql_data:
-
-networks:
-  frontend:
-  backend:
